@@ -82,6 +82,14 @@ if ($ADMIN->fulltree) {
     $setting->set_updatedcallback('theme_reset_all_caches');
     $page->add($setting);
 
+    // Site Favicon.
+    $name = 'theme_telaformation/favicon';
+    $title = get_string('favicon', 'theme_telaformation');
+    $description = get_string('favicondesc', 'theme_telaformation');
+    $setting = new admin_setting_configstoredfile($name, $title, $description, 'favicon');
+    $setting->set_updatedcallback('theme_reset_all_caches');
+    $page->add($setting);
+
     // Must add the page after definiting all the settings!
     $settings->add($page);
 
@@ -104,4 +112,5 @@ if ($ADMIN->fulltree) {
 
     // Login settings
     include(dirname(__FILE__) . '/settings/login.php');
+    include(dirname(__FILE__) . '/settings/navbar.php');
 }

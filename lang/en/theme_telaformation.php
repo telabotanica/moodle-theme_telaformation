@@ -66,6 +66,23 @@ $string['loginsettings'] = 'Login page settings';
 $string['logintextboxtop'] = 'Top text box';
 $string['logintextboxtopdesc'] = 'Add a custom text above the login box.';
 
+// Favicon *******************************************************.
+
+$string['favicon'] = 'Favicon';
+$string['favicondesc'] = 'Add a favicon';
+
+// Site logo *******************************************************.
+
+$string['sitelogo'] = 'Site logo';
+$string['sitelogodesc'] = 'Add a logo for ur site';
+
+// Navbar *******************************************************.
+$string['navbarsettings'] = 'Nav bar settings';
+$string['navbarcolor'] = 'Nav bar color';
+$string['navbarcolordesc'] = 'Add a background color to your nav bar';
+$string['navbartextcolor'] = 'Nav bar text color';
+$string['navbartextcolordesc'] = 'Add a text color to your nav bar';
+
 // Login *******************************************************.
 $string['loginsettings'] = 'Login Page';
 $string['loginsettingsheading'] = 'Customize the login page';
