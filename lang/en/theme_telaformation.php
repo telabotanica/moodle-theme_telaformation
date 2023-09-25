@@ -223,3 +223,5 @@ $string['region-theme-front-t'] = 'Telaformation front-t';
 $string['region-theme-front-u'] = 'Telaformation front-u';
 $string['region-side-post'] = 'Right';
 $string['region-side-pre'] = 'Left';
+
+$string['totop'] = 'To the top';

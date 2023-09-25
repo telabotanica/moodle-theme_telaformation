@@ -214,3 +214,5 @@ $string['stylestretch'] = 'Stretch';
 
 $string['hide'] = 'Cacher';
 $string['show'] = 'Afficher';
+
+$string['totop'] = 'Aller en haut';

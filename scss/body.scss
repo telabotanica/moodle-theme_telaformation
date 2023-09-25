@@ -73,4 +73,17 @@ body {
     .block_html {
         background: none;
     }
+
+    #topofscroll {
+        max-width: 100%;
+
+        #page-header {
+
+            max-width: 100%;
+        }
+
+        .moremenu {
+            max-width: 100%;
+        }
+    }
 }
