@@ -101,53 +101,20 @@ function theme_telaformation_get_extra_scss($theme) {
  */
 function theme_telaformation_process_css($css, $theme) {
     // Define the default settings for the theme incase they've not been set.
-    $defaults = [
-            'brandcolor' => '#000',
-            'brandcolorbutton' => '#000',
-            'brandcolortextbutton' => '#FFF',
-            'loginbgimage' => '',
-            'loginbgstyle' => '',
-            'loginbgopacity1' => '',
-            'loginbgopacity2' => '',
-            'loginbgopacity3' => '',
-            'navbarcolor' => '#FFF',
-            'navbartextcolor' => '#343B3F',
-            'footercolor' => '#343B3F',
-            'footertextcolor' => '#FFF',
-            'blockregionrowbackgroundcolor1' => '',
-            'blockregionrowbackgroundcolor2' => '',
-            'blockregionrowbackgroundcolor3' => '',
-            'blockregionrowbackgroundcolor4' => '',
-            'blockregionrowbackgroundcolor5' => '',
-            'blockregionrowbackgroundcolor6' => '',
-            'blockregionrowbackgroundcolor7' => '',
-            'blockregionrowbackgroundcolor8' => '',
-            'blockregionrowtextcolor1' => '',
-            'blockregionrowtextcolor2' => '',
-            'blockregionrowtextcolor3' => '',
-            'blockregionrowtextcolor4' => '',
-            'blockregionrowtextcolor5' => '',
-            'blockregionrowtextcolor6' => '',
-            'blockregionrowtextcolor7' => '',
-            'blockregionrowtextcolor8' => '',
-            'blockregionrowlinkcolor1' => '',
-            'blockregionrowlinkcolor2' => '',
-            'blockregionrowlinkcolor3' => '',
-            'blockregionrowlinkcolor4' => '',
-            'blockregionrowlinkcolor5' => '',
-            'blockregionrowlinkcolor6' => '',
-            'blockregionrowlinkcolor7' => '',
-            'blockregionrowlinkcolor8' => '',
-            'blockregionrowlinkhovercolor1' => '',
-            'blockregionrowlinkhovercolor2' => '',
-            'blockregionrowlinkhovercolor3' => '',
-            'blockregionrowlinkhovercolor4' => '',
-            'blockregionrowlinkhovercolor5' => '',
-            'blockregionrowlinkhovercolor6' => '',
-            'blockregionrowlinkhovercolor7' => '',
-            'blockregionrowlinkhovercolor8' => '',
-            'googlefont' => 'Verdana',
-    ];
+    $defaults = ['brandcolor' => '#000', 'brandcolorbutton' => '#000', 'brandcolortextbutton' => '#FFF', 'loginbgimage' => '',
+        'loginbgstyle' => '', 'loginbgopacity1' => '', 'loginbgopacity2' => '', 'loginbgopacity3' => '', 'navbarcolor' => '#FFF',
+        'navbartextcolor' => '#343B3F', 'footercolor' => '#343B3F', 'footertextcolor' => '#FFF',
+        'blockregionrowbackgroundcolor1' => '', 'blockregionrowbackgroundcolor2' => '', 'blockregionrowbackgroundcolor3' => '',
+        'blockregionrowbackgroundcolor4' => '', 'blockregionrowbackgroundcolor5' => '', 'blockregionrowbackgroundcolor6' => '',
+        'blockregionrowbackgroundcolor7' => '', 'blockregionrowbackgroundcolor8' => '', 'blockregionrowtextcolor1' => '',
+        'blockregionrowtextcolor2' => '', 'blockregionrowtextcolor3' => '', 'blockregionrowtextcolor4' => '',
+        'blockregionrowtextcolor5' => '', 'blockregionrowtextcolor6' => '', 'blockregionrowtextcolor7' => '',
+        'blockregionrowtextcolor8' => '', 'blockregionrowlinkcolor1' => '', 'blockregionrowlinkcolor2' => '',
+        'blockregionrowlinkcolor3' => '', 'blockregionrowlinkcolor4' => '', 'blockregionrowlinkcolor5' => '',
+        'blockregionrowlinkcolor6' => '', 'blockregionrowlinkcolor7' => '', 'blockregionrowlinkcolor8' => '',
+        'blockregionrowlinkhovercolor1' => '', 'blockregionrowlinkhovercolor2' => '', 'blockregionrowlinkhovercolor3' => '',
+        'blockregionrowlinkhovercolor4' => '', 'blockregionrowlinkhovercolor5' => '', 'blockregionrowlinkhovercolor6' => '',
+        'blockregionrowlinkhovercolor7' => '', 'blockregionrowlinkhovercolor8' => '', 'googlefont' => 'Verdana',];
 
     // Get all the defined settings for the theme and replace defaults.
     foreach ($theme->settings as $key => $val) {
@@ -285,12 +252,20 @@ function theme_telaformation_pluginfile($course, $cm, $context, $filearea, $args
 
 /** Function to darker css */
 function colorbrightness($hex, $percent) {
-    // Work out if hash given.
     $hash = '';
     if (stristr($hex, '#')) {
         $hex = str_replace('#', '', $hex);
         $hash = '#';
     }
+
+    // This function can't handle case if extrem white or extrem black
+    // We do this to prevent strange color.
+    if (strtoupper($hex) === "FFF" || strtoupper($hex) === "FFFFFF") {
+        $hex = "FFFFFE";
+    } else if ($hex === "000" || $hex === "000000") {
+        $hex = "010101";
+    }
+
     // HEX TO RGB.
     $rgb = [hexdec(substr($hex, 0, 2)), hexdec(substr($hex, 2, 2)), hexdec(substr($hex, 4, 2))];
     // CALCULATE.
@@ -332,30 +307,19 @@ function colorbrightness($hex, $percent) {
  */
 function telaformation_redirect_to_profile_page($bodyid) {
     global $USER;
-    if (optional_param(
-            'noredir', 0, PARAM_INT
-    )) {
+    if (optional_param('noredir', 0, PARAM_INT)) {
         return;
     }
     if ($bodyid == 'page-user-profile') {
-        $id = optional_param(
-                'id', 0, PARAM_INT
-        );
+        $id = optional_param('id', 0, PARAM_INT);
         $params = ['userid' => $id];
-        $redirecturl = new moodle_url(
-                '/theme/telaformation/layout/profile.php', $params
-        );
+        $redirecturl = new moodle_url('/theme/telaformation/layout/profile.php', $params);
         if (!empty($id)) {
             redirect($redirecturl);
         }
     } else if ($bodyid == 'page-user-preferences') {
-        $params = [
-                'userid' => $USER->id,
-                'preferences' => 1
-        ];
-        $redirecturl = new moodle_url(
-                '/theme/telaformation/layout/profile.php', $params
-        );
+        $params = ['userid' => $USER->id, 'preferences' => 1];
+        $redirecturl = new moodle_url('/theme/telaformation/layout/profile.php', $params);
         redirect($redirecturl);
     }
 
@@ -365,22 +329,15 @@ function telaformation_redirect_to_profile_page($bodyid) {
  * Get icon mapping for font-awesome.
  */
 function theme_telaformation_get_fontawesome_icon_map() {
-    return [
-            'theme_telaformation:t/check' => 'fa-check',
-    ];
+    return ['theme_telaformation:t/check' => 'fa-check',];
 }
 
 /**
  * @return array
  */
 function theme_telaformation_regions() {
-    $regions = [
-            'side-pre',
-            'side-post'
-    ];
-    foreach (range(
-            'a', 'u'
-    ) as $reg) {
+    $regions = ['side-pre', 'side-post'];
+    foreach (range('a', 'u') as $reg) {
         $regions[] = 'theme-front-' . $reg;
     }
     return $regions;

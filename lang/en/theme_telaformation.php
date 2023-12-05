@@ -225,3 +225,7 @@ $string['region-side-post'] = 'Right';
 $string['region-side-pre'] = 'Left';
 
 $string['totop'] = 'To the top';
+
+// Show or not navigation in mod in course.
+$string['showactivitynavigation'] = "Show previous/next navigation for mods";
+$string['showactivitynavigation_desc'] = "This option allows you to show or hide the previous/next navigation in the activities";

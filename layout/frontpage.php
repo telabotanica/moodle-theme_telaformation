@@ -25,7 +25,6 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-user_preference_allow_ajax_update('drawer-open-nav', PARAM_ALPHA);
 require_once($CFG->libdir . '/behat/lib.php');
 
 $extraclasses = [];
@@ -40,10 +39,6 @@ $addblockbutton = $OUTPUT->addblockbutton();
 
 $hasblocks = (strpos($blockshtml, 'data-block=') !== false || !empty($addblockbutton));
 
-user_preference_allow_ajax_update('drawer-open-nav', PARAM_ALPHA);
-user_preference_allow_ajax_update('drawer-open-index', PARAM_BOOL);
-user_preference_allow_ajax_update('drawer-open-block', PARAM_BOOL);
-
 if (isloggedin()) {
     $courseindexopen = (get_user_preferences('drawer-open-index') == true);
     $blockdraweropen = (get_user_preferences('drawer-open-block') == true);
@@ -51,16 +46,22 @@ if (isloggedin()) {
     $courseindexopen = false;
     $blockdraweropen = false;
 }
+
 if (!$hasblocks) {
     $blockdraweropen = false;
 }
+
 $courseindex = core_course_drawer();
+
 if (!$courseindex) {
     $courseindexopen = false;
 }
+
 $forceblockdraweropen = $OUTPUT->firstview_fakeblocks();
 
-$buildregionmainsettings = !$PAGE->include_region_main_settings_in_header_actions() && !$PAGE->has_secondary_navigation();
+$buildregionmainsettings = !$PAGE->include_region_main_settings_in_header_actions()
+    && !$PAGE->has_secondary_navigation();
+
 // If the settings menu will be included in the header then don't add it here.
 $regionmainsettingsmenu = $buildregionmainsettings ? $OUTPUT->region_main_settings_menu() : false;
 $hasfrontpageregions = $OUTPUT->get_block_regions();
