@@ -25,6 +25,7 @@
 
 namespace theme_telaformation\output;
 
+use core\navigation\output\primary;
 use core_auth\output\login;
 use stdClass;
 use theme_config;
@@ -87,8 +88,12 @@ final class core_renderer extends \theme_boost\output\core_renderer {
         );
         $template->bodyattributes = $output->body_attributes($extraclasses);
 
-        // Define nav for the drawer.
-        $template->flatnavigation = $this->page->flatnav;
+        $renderer = $this->page->get_renderer('core');
+        $primary = new primary($this->page);
+        $primarymenu = $primary->export_for_template($renderer);
+
+        $template->mobileprimarynav = $primarymenu['mobileprimarynav'];
+        $template->primarymoremenu = $primarymenu['moremenu'];
 
         // Output content.
         $template->output = $output;
@@ -497,204 +502,98 @@ final class core_renderer extends \theme_boost\output\core_renderer {
     }
 
     /**
-     * Construct a user menu, returning HTML that can be echoed out by a
-     * layout file.
      *
-     * @param stdClass $user A user object, usually $USER.
-     * @param bool $withlinks true if a dropdown should be built.
-     * @return string HTML fragment.
+     * Display activity navigation.
+     *
+     * @return bool
      */
-    public function user_menu($user = null, $withlinks = null) {
-        global $USER, $CFG;
-        require_once($CFG->dirroot . '/user/lib.php');
+    public function show_activity_navigation(): bool {
+        $themeconfig = theme_config::load('telaformation');
+        $showactivitynav = false;
+        if ($themeconfig->settings->showactivitynavigation) {
+            $showactivitynav = true;
+        }
+        return $showactivitynav;
+    }
 
-        if (is_null($user)) {
-            $user = $USER;
+    /**
+     * Returns standard navigation between activities in a course.
+     *
+     * @return string the navigation HTML.
+     */
+    public function activity_navigation() {
+        // First we should check if we want to add navigation.
+        $context = $this->page->context;
+        if (($this->page->pagelayout !== 'incourse' && $this->page->pagelayout !== 'frametop')
+            || $context->contextlevel != CONTEXT_MODULE || $this->page->bodyid == 'page-mod-quiz-attempt') {
+            return '';
         }
 
-        // Note: this behaviour is intended to match that of core_renderer::login_info,
-        // but should not be considered to be good practice; layout options are
-        // intended to be theme-specific. Please don't copy this snippet anywhere else.
-        if (is_null($withlinks)) {
-            $withlinks = empty($this->page->layout_options['nologinlinks']);
+        // If the activity is in stealth mode, show no links.
+        if ($this->page->cm->is_stealth()) {
+            return '';
         }
 
-        // Add a class for when $withlinks is false.
-        $usermenuclasses = 'usermenu';
-        if (!$withlinks) {
-            $usermenuclasses .= ' withoutlinks';
-        }
+        $course = $this->page->cm->get_course();
+        $courseformat = course_get_format($course);
 
-        $returnstr = "";
+        // Get a list of all the activities in the course.
+        $modules = get_fast_modinfo($course->id)->get_cms();
 
-        // If during initial install, return the empty return string.
-        if (during_initial_install()) {
-            return $returnstr;
-        }
-
-        $loginpage = $this->is_login_page();
-        $loginurl = get_login_url();
-        // If not logged in, show the typical not-logged-in string.
-        if (!isloggedin()) {
-            if (!$loginpage) {
-
-                $returnstr = "<form action=\"$loginurl\">
-<button class='btn btn-primary' type='submit'>".
-                        get_string('login')."</button></form>";
-            } else {
-                $returnstr = get_string('loggedinnot', 'moodle');
-
+        // Put the modules into an array in order by the position they are shown in the course.
+        $mods = [];
+        $activitylist = [];
+        foreach ($modules as $module) {
+            // Only add activities the user can access, aren't in stealth mode and have a url (eg. mod_label does not).
+            if (!$module->uservisible || $module->is_stealth() || empty($module->url)) {
+                continue;
             }
-            return html_writer::div(
-                    html_writer::span(
-                            $returnstr,
-                            'login'
-                    ),
-                    $usermenuclasses
-            );
+            $mods[$module->id] = $module;
 
-        }
-
-        // If logged in as a guest user, show a string to that effect.
-        if (isguestuser()) {
-            $returnstr = get_string('loggedinasguest');
-            if (!$loginpage && $withlinks) {
-                $returnstr .= " (<a href=\"$loginurl\">".get_string('login').'</a>)';
+            // No need to add the current module to the list for the activity dropdown menu.
+            if ($module->id == $this->page->cm->id) {
+                continue;
             }
-
-            return html_writer::div(
-                    html_writer::span(
-                            $returnstr,
-                            'login'
-                    ),
-                    $usermenuclasses
-            );
-        }
-
-        // Get some navigation opts.
-        $opts = user_get_user_navigation_info($user, $this->page);
-
-        $avatarclasses = "avatars";
-        $avatarcontents = html_writer::span($opts->metadata['useravatar'], 'avatar current');
-        $usertextcontents = $opts->metadata['userfullname'];
-
-        // Other user.
-        if (!empty($opts->metadata['asotheruser'])) {
-            $avatarcontents .= html_writer::span(
-                    $opts->metadata['realuseravatar'],
-                    'avatar realuser'
-            );
-            $usertextcontents = $opts->metadata['realuserfullname'];
-            $usertextcontents .= html_writer::tag(
-                    'span',
-                    get_string(
-                            'loggedinas',
-                            'moodle',
-                            html_writer::span(
-                                    $opts->metadata['userfullname'],
-                                    'value'
-                            )
-                    ),
-                    array('class' => 'meta viewingas')
-            );
-        }
-
-        // Role.
-        if (!empty($opts->metadata['asotherrole'])) {
-            $role = core_text::strtolower(preg_replace('#[ ]+#', '-', trim($opts->metadata['rolename'])));
-            $usertextcontents .= html_writer::span(
-                    $opts->metadata['rolename'],
-                    'meta role role-' . $role
-            );
-        }
-
-        // User login failures.
-        if (!empty($opts->metadata['userloginfail'])) {
-            $usertextcontents .= html_writer::span(
-                    $opts->metadata['userloginfail'],
-                    'meta loginfailures'
-            );
-        }
-
-        // MNet.
-        if (!empty($opts->metadata['asmnetuser'])) {
-            $mnet = strtolower(preg_replace('#[ ]+#', '-', trim($opts->metadata['mnetidprovidername'])));
-            $usertextcontents .= html_writer::span(
-                    $opts->metadata['mnetidprovidername'],
-                    'meta mnet mnet-' . $mnet
-            );
-        }
-
-        $returnstr .= html_writer::span(
-                html_writer::span($usertextcontents, 'usertext mr-1') .
-                html_writer::span($avatarcontents, $avatarclasses),
-                'userbutton'
-        );
-
-        // Create a divider (well, a filler).
-        $divider = new action_menu_filler();
-        $divider->primary = false;
-
-        $am = new action_menu();
-        $am->set_menu_trigger(
-                $returnstr
-        );
-        $am->set_action_label(get_string('usermenu'));
-        $am->set_alignment(action_menu::TR, action_menu::BR);
-        $am->set_nowrap_on_items();
-        if ($withlinks) {
-            $navitemcount = count($opts->navitems);
-            $idx = 0;
-            foreach ($opts->navitems as $key => $value) {
-
-                switch ($value->itemtype) {
-                    case 'divider':
-                        // If the nav item is a divider, add one and skip link processing.
-                        $am->add($divider);
-                        break;
-
-                    case 'invalid':
-                        // Silently skip invalid entries (should we post a notification?).
-                        break;
-
-                    case 'link':
-                        // Process this as a link item.
-                        $pix = null;
-                        if (isset($value->pix) && !empty($value->pix)) {
-                            $pix = new pix_icon($value->pix, '', null, array('class' => 'iconsmall'));
-                        } else if (isset($value->imgsrc) && !empty($value->imgsrc)) {
-                            $value->title = html_writer::img(
-                                            $value->imgsrc,
-                                            $value->title,
-                                            array('class' => 'iconsmall')
-                                    ) . $value->title;
-                        }
-
-                        $al = new action_menu_link_secondary(
-                                $value->url,
-                                $pix,
-                                $value->title,
-                                array('class' => 'icon')
-                        );
-                        if (!empty($value->titleidentifier)) {
-                            $al->attributes['data-title'] = $value->titleidentifier;
-                        }
-                        $am->add($al);
-                        break;
-                }
-
-                $idx++;
-
-                // Add dividers after the first item and before the last item.
-                if ($idx == 1 || $idx == $navitemcount - 1) {
-                    $am->add($divider);
-                }
+            // Module name.
+            $modname = $module->get_formatted_name();
+            // Display the hidden text if necessary.
+            if (!$module->visible) {
+                $modname .= ' ' . get_string('hiddenwithbrackets');
             }
+            // Module URL.
+            $linkurl = new moodle_url($module->url, array('forceview' => 1));
+            // Add module URL (as key) and name (as value) to the activity list array.
+            $activitylist[$linkurl->out(false)] = $modname;
         }
 
-        return html_writer::div(
-                $this->render($am),
-                $usermenuclasses
-        );
+        $nummods = count($mods);
+
+        // If there is only one mod then do nothing.
+        if ($nummods == 1) {
+            return '';
+        }
+
+        // Get an array of just the course module ids used to get the cmid value based on their position in the course.
+        $modids = array_keys($mods);
+
+        // Get the position in the array of the course module we are viewing.
+        $position = array_search($this->page->cm->id, $modids);
+
+        $prevmod = null;
+        $nextmod = null;
+
+        // Check if we have a previous mod to show.
+        if ($position > 0) {
+            $prevmod = $mods[$modids[$position - 1]];
+        }
+
+        // Check if we have a next mod to show.
+        if ($position < ($nummods - 1)) {
+            $nextmod = $mods[$modids[$position + 1]];
+        }
+
+        $activitynav = new \core_course\output\activity_navigation($prevmod, $nextmod, $activitylist);
+        $renderer = $this->page->get_renderer('core', 'course');
+        return $renderer->render($activitynav);
     }
 }

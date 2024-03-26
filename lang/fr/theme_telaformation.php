@@ -214,3 +214,11 @@ $string['stylestretch'] = 'Stretch';
 
 $string['hide'] = 'Cacher';
 $string['show'] = 'Afficher';
+
+$string['totop'] = 'Aller en haut';
+
+// Show or not navigation in mod in course.
+$string['showactivitynavigation'] = "Active des fonctionnalités de navigation dans chaque activité et ressource";
+$string['showactivitynavigation_desc'] =
+    "Depuis Moodle 4.0, la navigation entre les activités et les ressources n’est plus disponible en bas de page. Cette option permet d’afficher un lien vers l’activité ou la ressource précédente et suivante. Elle affiche également un menu déroulant pour accéder à n’importe quel contenu du cours.";
+

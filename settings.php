@@ -136,6 +136,24 @@ if ($ADMIN->fulltree) {
 
     $settings->add($page);
 
+    // Show or not navigation in mod in course.
+    $name = 'theme_telaformation/showactivitynavigation';
+    $title = get_string(
+        'showactivitynavigation',
+        'theme_telaformation'
+    );
+    $description = get_string(
+        'showactivitynavigation_desc',
+        'theme_telaformation'
+    );
+    $setting = new admin_setting_configcheckbox(
+        $name,
+        $title,
+        $description,
+        true
+    );
+    $page->add($setting);
+
     // Login settings.
     include_once(dirname(__FILE__) . '/settings/frontpage.php');
     include_once(dirname(__FILE__) . '/settings/login.php');

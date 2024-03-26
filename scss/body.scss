@@ -21,11 +21,18 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+$gototop-bottom-position: 50px !default;
+
 body {
     font-family: unquote('googlefont'), serif;
 
     #page {
         margin-top: 0;
+
+        &.drawers {
+            padding-left: 0;
+            padding-right: 0;
+        }
     }
 
     .btn-primary,
@@ -72,5 +79,45 @@ body {
 
     .block_html {
         background: none;
+    }
+
+    #topofscroll {
+        max-width: 100%;
+
+        #page-header {
+
+            max-width: 100%;
+        }
+
+        .moremenu {
+            max-width: 100%;
+        }
+    }
+}
+
+body.scrolled #goto-top-link {
+    opacity: 1;
+    visibility: visible;
+    transition: visibility 0s ease 0s, opacity .7s ease .1s;
+}
+
+@include media-breakpoint-down(sm) {
+    #goto-top-link {
+        bottom: 0;
+    }
+}
+
+#goto-top-link {
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity .7s ease 0s, visibility .1s ease .8s;
+    display: block;
+    position: fixed;
+    bottom: $gototop-bottom-position;
+    right: 0;
+    a {
+        position: absolute;
+        right: 0;
+        transform: translateY(-100%);
     }
 }

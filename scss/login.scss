@@ -24,6 +24,10 @@
 /* Login Page */
 /* Background Image */
 
+body#page-login-index {
+    height: calc(100% - 65px);
+}
+
 #page-login-index {
     background: unquote('loginbgimage');
     background-size: unquote('loginbgstyle');
